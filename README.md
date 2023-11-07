@@ -53,3 +53,17 @@ documents = [cv.imread("document1.png"), cv.imread("document2.png")]
 # Get the predictions
 predictions = get_prediction(documents, device="cuda:0")
 ```
+
+## Acknowledgements
+
+When using the code from this repository, please cite the following work:
+
+```
+@article{borghi2023revelio,
+  title={Revelio: a Modular and Effective Framework for Reproducible Training and Evaluation of Morphing Attack Detectors},
+  author={Borghi, Guido and Di Domenico, Nicol{\`o} and Franco, Annalisa and Ferrara, Matteo and Maltoni, Davide},
+  journal={IEEE Access},
+  year={2023},
+  publisher={IEEE}
+}
+```
