@@ -1,3 +1,4 @@
+from pathlib import Path
 import numpy as np
 import cv2 as cv
 import torch
@@ -5,7 +6,7 @@ from facenet_pytorch import MTCNN, InceptionResnetV1
 
 
 WEIGHTS_URL = "https://miatbiolab.csr.unibo.it/wp-content/uploads/2023/inception-resnet-smad-4a96dd25.ckpt"
-
+WEIGHTS_FILE = "./weights/inception-resnet-smad-4a96dd25.ckpt"
 
 def _crop_face(image_rgb: np.ndarray, mtcnn: MTCNN) -> np.ndarray:
     boxes, _ = mtcnn.detect(image_rgb)
@@ -69,8 +70,11 @@ def get_prediction(
         device = torch.device(device)
     if isinstance(document_bgr, np.ndarray):
         document_bgr = [document_bgr]
-    # Download the Siamese weights
-    state_dict = torch.hub.load_state_dict_from_url(WEIGHTS_URL, map_location="cpu", check_hash=True)
+    # Download the Siamese weights or load them from file
+    if Path(WEIGHTS_FILE).exists():
+        state_dict = torch.load(WEIGHTS_FILE)
+    else:
+        state_dict = torch.hub.load_state_dict_from_url(WEIGHTS_URL, map_location="cpu", check_hash=True)
     # Load the SMAD classifier
     smad = InceptionResnetV1(
         pretrained=None,
@@ -93,4 +97,8 @@ def get_prediction(
         device_batch = batch.to(device)
         scores = smad(device_batch).squeeze()
         scores = torch.sigmoid_(scores).cpu().tolist()
-    return scores if len(scores) > 1 else scores[0]
+        
+        # Return the score(s) as a list 
+        scores = [scores] if isinstance(scores, float) else scores 
+
+        return scores if len(scores) > 1 else scores[0]
